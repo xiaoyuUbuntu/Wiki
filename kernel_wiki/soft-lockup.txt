@@ -1,0 +1,361 @@
+soft-lockup CPU0 stuck for 22s!
+
+例子：
+{
+NMI watchdog: BUG: soft lockup - CPU#0 stuck for 23s! [XXX:307]
+-0-[2021-12-08 08:53:43][137888.004318] Modules linked in: YYY
+-0-[2021-12-08 08:53:43][137888.004445] CPU: 0 PID: 307 Comm: XXX Tainted: P           O    
+-0-[2021-12-08 08:53:43][137888.004468] Hardware name: ARM-MOLCHIP
+-0-[2021-12-08 08:53:43][137888.004493] task: c236a600 task.stack: c2390000
+-0-[2021-12-08 08:53:43][137888.004530] PC is at __do_softirq+0x6c/0x200
+-0-[2021-12-08 08:53:43][137888.004557] LR is at irq_exit+0x94/0x104
+-0-[2021-12-08 08:53:43][137888.004585] pc : [<c011a5bc>]    lr : [<c011a9d4>]    psr: 60000113
+               [2021-12-08 08:53:43][137888.004585] sp : c2391f30  ip : 00000000  fp : c2391f30
+-0-[2021-12-08 08:53:43][137888.004621] r10: 000014e8  r9 : 0000000a  r8 : 00400140
+-0-[2021-12-08 08:53:43][137888.004649] r7 : c0835f00  r6 : 00000082  r5 : 00000000  r4 : c2390000
+-0-[2021-12-08 08:53:43][137888.004673] r3 : 00000000  r2 : 00000000  r1 : c0835f00  r0 : 00000000
+-0-[2021-12-08 08:53:43][137888.004698] Flags: nZCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment none
+-0-[2021-12-08 08:53:43][137888.004728] Control: 10c5387d  Table: 44ea806a  DAC: 00000051
+-0-[2021-12-08 08:53:43][137888.004756] CPU: 0 PID: 307 Comm: XXX Tainted: P           O   
+-0-[2021-12-08 08:53:43][137888.004777] Hardware name: ARM-MOLCHIP
+-0-[2021-12-08 08:53:43][137888.004827] [<c010d394>] (unwind_backtrace) from [<c010a2dc>] (show_stack+0x10/0x14)
+-0-[2021-12-08 08:53:43][137888.004867] [<c010a2dc>] (show_stack) from [<c02c4bc4>] (dump_stack+0x7c/0x9c)
+-0-[2021-12-08 08:53:43][137888.004908] [<c02c4bc4>] (dump_stack) from [<c017b874>] (watchdog_timer_fn+0x1b0/0x24c)
+-0-[2021-12-08 08:53:43][137888.004946] [<c017b874>] (watchdog_timer_fn) from [<c01622cc>] (__hrtimer_run_queues+0xb4/0x150)
+-0-[2021-12-08 08:53:43][137888.004983] [<c01622cc>] (__hrtimer_run_queues) from [<c016288c>] (hrtimer_interrupt+0x98/0x1e4)
+-0-[2021-12-08 08:53:43][137888.005022] [<c016288c>] (hrtimer_interrupt) from [<c040b08c>] (arch_timer_handler_phys+0x28/0x30)
+-0-[2021-12-08 08:53:43][137888.005063] [<c040b08c>] (arch_timer_handler_phys) from [<c01578e4>] (handle_percpu_devid_irq+0x70/0x11c)
+-0-[2021-12-08 08:53:43][137888.005100] [<c01578e4>] (handle_percpu_devid_irq) from [<c01533f8>] (generic_handle_irq+0x18/0x28)
+-0-[2021-12-08 08:53:43][137888.005138] [<c01533f8>] (generic_handle_irq) from [<c01538f0>] (__handle_domain_irq+0x8c/0xb4)
+-0-[2021-12-08 08:53:43][137888.005175] [<c01538f0>] (__handle_domain_irq) from [<c01013d4>] (gic_handle_irq+0x4c/0x94)
+-0-[2021-12-08 08:53:43][137888.005207] [<c01013d4>] (gic_handle_irq) from [<c010ac4c>] (__irq_svc+0x6c/0x90)
+-0-[2021-12-08 08:53:43][137888.005234] Exception stack(0xc2391ee0 to 0xc2391f28)
+-0-[2021-12-08 08:53:43][137888.005266] 1ee0: 00000000 c0835f00 00000000 00000000 c2390000 00000000 00000082 c0835f00
+-0-[2021-12-08 08:53:43][137888.005298] 1f00: 00400140 0000000a 000014e8 c2391f30 00000000 c2391f30 c011a9d4 c011a5bc
+-0-[2021-12-08 08:53:43][137888.005323] 1f20: 60000113 ffffffff
+-0-[2021-12-08 08:53:43][137888.005357] [<c010ac4c>] (__irq_svc) from [<c011a5bc>] (__do_softirq+0x6c/0x200)
+-0-[2021-12-08 08:53:43][137888.005394] [<c011a5bc>] (__do_softirq) from [<c011a9d4>] (irq_exit+0x94/0x104)
+-0-[2021-12-08 08:53:43][137888.005430] [<c011a9d4>] (irq_exit) from [<c01538f4>] (__handle_domain_irq+0x90/0xb4)
+-0-[2021-12-08 08:53:43][137888.005463] [<c01538f4>] (__handle_domain_irq) from [<c01013d4>] (gic_handle_irq+0x4c/0x94)
+-0-[2021-12-08 08:53:43][137888.005495] [<c01013d4>] (gic_handle_irq) from [<c010aff0>] (__irq_usr+0x50/0x80)
+
+}
+
+
+
+怎么检测的呢？
+检测机制怎么触发的？
+
+4.9.37_kernel的机制
+1、在lockup_detector_init中为每个cpu创建watchdog内核线程；
+	smpboot_register_percpu_thread_cpumask(&watchdog_threads,&watchdog_cpumask);
+2、调用setup创建高精度定时器及其回调
+	setup			= watchdog_enable,
+	
+static void watchdog_enable(unsigned int cpu)
+{
+	采用的是percpu变量和相关操作
+	struct hrtimer *hrtimer = raw_cpu_ptr(&watchdog_hrtimer);
+
+	/* kick off the timer for the hardlockup detector */
+	hrtimer_init(hrtimer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+	hrtimer->function = watchdog_timer_fn;
+
+	/* Enable the perf event */
+	watchdog_nmi_enable(cpu);
+
+	定时器时间为4秒
+	/* done here because hrtimer_start can only pin to smp_processor_id() */
+	hrtimer_start(hrtimer, ns_to_ktime(sample_period),
+		      HRTIMER_MODE_REL_PINNED);
+
+	设置当前线程的调度策略 优先级
+	/* initialize timestamp */
+	watchdog_set_prio(SCHED_FIFO, MAX_RT_PRIO - 1);
+	
+	更新时间戳
+	__touch_watchdog();
+}	
+	
+3、watchdog线程在干嘛？
+3.1、watchdog_should_run
+
+检查hrtimer_interrupts 和soft_lockup_hrtimer_cnt 计数是否相同，
+不等返回1，相等返回0；它们两个分别在哪里更新的？
+static int watchdog_should_run(unsigned int cpu)
+{
+	return __this_cpu_read(hrtimer_interrupts) !=
+		__this_cpu_read(soft_lockup_hrtimer_cnt);
+}
+
+是两者相等时执行watchdog，还是不等时呢？
+不等时执行watchdog
+
+
+3.2、watchdog ---更新时间戳
+static void watchdog(unsigned int cpu)
+{
+	将hrtimer_interrupts值赋给soft_lockup_hrtimer_cnt
+	__this_cpu_write(soft_lockup_hrtimer_cnt,
+			 __this_cpu_read(hrtimer_interrupts));
+			 
+	__touch_watchdog(); 更新时间戳
+
+	/*
+	 * watchdog_nmi_enable() clears the NMI_WATCHDOG_ENABLED bit in the
+	 * failure path. Check for failures that can occur asynchronously -
+	 * for example, when CPUs are on-lined - and shut down the hardware
+	 * perf event on each CPU accordingly.
+	 *
+	 * The only non-obvious place this bit can be cleared is through
+	 * watchdog_nmi_enable(), so a pr_info() is placed there.  Placing a
+	 * pr_info here would be too noisy as it would result in a message
+	 * every few seconds if the hardlockup was disabled but the softlockup
+	 * enabled.
+	 */
+	if (!(watchdog_enabled & NMI_WATCHDOG_ENABLED))
+		watchdog_nmi_disable(cpu);
+}
+
+static void __touch_watchdog(void)
+{
+	__this_cpu_write(watchdog_touch_ts, get_timestamp());
+}
+
+总结下：
+	watchdog线程就是在某条件下进行soft_lockup_hrtimer_cnt计数和watchdog时间的更新
+
+
+4、watchdog_timer_fn做了哪些事情？
+	
+static enum hrtimer_restart watchdog_timer_fn(struct hrtimer *hrtimer)
+{
+	先获取时间，若watchdog线程有执行到则watchdog_touch_ts为最新值
+	unsigned long touch_ts = __this_cpu_read(watchdog_touch_ts);
+	struct pt_regs *regs = get_irq_regs();  		//获取关中断前的寄存器值
+	int duration;
+	int softlockup_all_cpu_backtrace = sysctl_softlockup_all_cpu_backtrace;
+
+	if (atomic_read(&watchdog_park_in_progress) != 0)
+		return HRTIMER_NORESTART;
+
+	/* kick the hardlockup detector */
+	watchdog_interrupt_count();           //hrtimer_interrupts++
+
+	/* kick the softlockup detector */
+	wake_up_process(__this_cpu_read(softlockup_watchdog)); //唤醒watchdog线程
+
+	/* .. and repeat */
+	hrtimer_forward_now(hrtimer, ns_to_ktime(sample_period)); //重新计数
+
+	if (touch_ts == 0) 
+	{
+		if (unlikely(__this_cpu_read(softlockup_touch_sync))) 
+		{
+			/*
+			 * If the time stamp was touched atomically
+			 * make sure the scheduler tick is up to date.
+			 */
+			__this_cpu_write(softlockup_touch_sync, false);
+			sched_clock_tick();
+		}
+
+		/* Clear the guest paused flag on watchdog reset */
+		kvm_check_and_clear_guest_paused();
+		__touch_watchdog();
+		return HRTIMER_RESTART;
+	}
+
+	/* check for a softlockup
+	 * This is done by making sure a high priority task is
+	 * being scheduled.  The task touches the watchdog to
+	 * indicate it is getting cpu time.  If it hasn't then
+	 * this is a good indication some task is hogging the cpu
+	 */
+	duration = is_softlockup(touch_ts);        /*22S*/
+	if (unlikely(duration)) 
+	{
+		/*
+		 * If a virtual machine is stopped by the host it can look to
+		 * the watchdog like a soft lockup, check to see if the host
+		 * stopped the vm before we issue the warning
+		 */
+		if (kvm_check_and_clear_guest_paused())
+			return HRTIMER_RESTART;
+
+		/* only warn once */
+		if (__this_cpu_read(soft_watchdog_warn) == true) 
+		{
+			/*
+			 * When multiple processes are causing softlockups the
+			 * softlockup detector only warns on the first one
+			 * because the code relies on a full quiet cycle to
+			 * re-arm.  The second process prevents the quiet cycle
+			 * and never gets reported.  Use task pointers to detect
+			 * this.
+			 */
+			if (__this_cpu_read(softlockup_task_ptr_saved) !=
+			    current) 
+			{
+				__this_cpu_write(soft_watchdog_warn, false);
+				__touch_watchdog();
+			}
+			return HRTIMER_RESTART;
+		}
+
+		if (softlockup_all_cpu_backtrace) {
+			/* Prevent multiple soft-lockup reports if one cpu is already
+			 * engaged in dumping cpu back traces
+			 */
+			if (test_and_set_bit(0, &soft_lockup_nmi_warn)) {
+				/* Someone else will report us. Let's give up */
+				__this_cpu_write(soft_watchdog_warn, true);
+				return HRTIMER_RESTART;
+			}
+		}
+
+		pr_emerg("BUG: soft lockup - CPU#%d stuck for %us! [%s:%d]\n",
+			smp_processor_id(), duration,
+			current->comm, task_pid_nr(current));
+		__this_cpu_write(softlockup_task_ptr_saved, current);
+		print_modules();
+		print_irqtrace_events(current);
+		if (regs)
+		{
+			show_regs(regs);
+		}
+		else
+			dump_stack();
+
+		if (softlockup_all_cpu_backtrace) {
+			/* Avoid generating two back traces for current
+			 * given that one is already made above
+			 */
+			trigger_allbutself_cpu_backtrace();
+
+			clear_bit(0, &soft_lockup_nmi_warn);
+			/* Barrier to sync with other cpus */
+			smp_mb__after_atomic();
+		}
+
+		add_taint(TAINT_SOFTLOCKUP, LOCKDEP_STILL_OK);
+		if (softlockup_panic)
+			panic("softlockup: hung tasks");
+		__this_cpu_write(soft_watchdog_warn, true);
+	} else
+		__this_cpu_write(soft_watchdog_warn, false);
+
+	return HRTIMER_RESTART;
+}
+
+static int is_softlockup(unsigned long touch_ts)
+{
+	unsigned long now = get_timestamp();
+
+	if ((watchdog_enabled & SOFT_WATCHDOG_ENABLED) && watchdog_thresh)
+	{
+		/* Warn about unreasonable delays. */
+		if (time_after(now, touch_ts + get_softlockup_thresh()))
+			return now - touch_ts;
+	}
+	return 0;
+}
+
+总体流程：
+		watchdog内核线程创建
+				|
+		watchdog内核线程使能     ---1
+				|
+		高精度定时器超时时间到   ---2
+				|
+		判断出现softlockup报错   ---3
+		
+1、内核线程使能分如下几下步：
+1.1、创建hrtimer定时器
+1.2、使能定时器
+1.3、更新时间戳watchdog_touch_ts
+
+
+
+2、watchdog高精度定时器处理函数：
+2.1、获取watchdog_touch_ts值
+2.2、更新hrtimer_interrupts值
+2.3、唤醒watchdog线程
+2.4、更新hrtimer
+2.5、判断是否当前时间是否大于watchdog_touch_ts+watchdog_thresh*2
+2.6、若是则判断为发生 soft lockup
+
+3、报错信息
+3.1、pr_emerg("BUG: soft lockup - CPU#%d stuck for %us! [%s:%d]\n",
+			smp_processor_id(), duration, current->comm, task_pid_nr(current));
+
+3.2、show_regs(regs);
+3.2.1、-> print_symbol("PC is at %s\n", instruction_pointer(regs));
+3.2.2、-> lr = regs->compat_lr;
+3.2.3、-> sp = regs->compat_sp;
+
+
+
+4.19.148_kernel的机制
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
