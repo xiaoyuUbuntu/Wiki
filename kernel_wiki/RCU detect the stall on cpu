@@ -1,1 +1,205 @@
 
+INFO: rcu_sched self-detected stall on CPU
+	0-...: (1 GPs behind) idle=af7/140000000000002/0 softirq=8177505/8177506 fqs=35077
+	(t=84003 jiffies g=4445235 c=4445234 q=179)
+到底是个什么东东呢？
+
+RCU CPU Stall Warnings是什么？
+
+字面意思：CPU0 发现自己卡住了，时间是84003 个jiffies。
+
+rcu_sched 是啥？
+
+什么会引起这个warning？
+
+o	A CPU looping in an RCU read-side critical section.
+	RCU读取端临界区发生CPU循环
+	
+o	A CPU looping with interrupts disabled.  
+	This condition can result in RCU-sched and RCU-bh stalls.
+	禁用中断的CPU循环。
+	这种场景会导致 RCU-sched 和RCU-bh 停顿
+
+o	A CPU looping with preemption disabled.  This condition can 
+	result in RCU-sched stalls and, if ksoftirqd is in use, RCU-bh
+	stalls.
+	关抢占后的CPU循环。这种情况会导致 RCU-sched 停顿，
+	如果 ksoftirqd 正在使用，RCU-bh 停顿。
+
+o	A CPU looping with bottom halves disabled.  This condition can 
+	result in RCU-sched and RCU-bh stalls.
+	禁用下半部分的 CPU 循环。 这种情况会导致 RCU-schedule 和 RCU-bh 停顿
+
+o	For !CONFIG_PREEMPT kernels, a CPU looping anywhere in the 
+	kernel without invoking schedule().  Note that cond_resched()
+	does not necessarily prevent RCU CPU stall warnings.  Therefore,
+	if the looping in the kernel is really expected and desirable
+	behavior, you might need to replace some of the cond_resched()
+	calls with calls to cond_resched_rcu_qs().
+	对于关闭抢占的内核，CPU 在内核中的任何位置循环，而无需调用 schedule()
+	请注意， cond_resched() 不一定能阻止 RCU CPU 停顿警告。
+	因此，如果内核中的循环确实是预期和可取的行为，
+	您可能需要将一些 cond_resched() 调用替换为对 cond_resched_rcu_qs() 的调用
+
+o	Booting Linux using a console connection that is too slow to 
+	keep up with the boot-time console-message rate.  For example,
+	a 115Kbaud serial console can be -way- too slow to keep up
+	with boot-time message rates, and will frequently result in
+	RCU CPU stall warning messages.  Especially if you have added
+	debug printk()s.
+	使用控制台连接引导 Linux，该连接太慢而无法跟上引导时控制台消息速率。 
+	例如，115Kbaud 串行控制台可能太慢而无法跟上启动时的消息速率，
+	并且会经常导致 RCU CPU 停顿警告消息。特别是如果您添加了调试 printk()s
+
+o	Anything that prevents RCU's grace-period kthreads from running. 
+	This can result in the "All QSes seen" console-log message.
+	This message will include information on when the kthread last
+	ran and how often it should be expected to run.
+	任何阻止 RCU 的宽限期 kthread 运行的。这可能会导致“所有 QSes 可见”控制台日志消息。
+	此消息将包含有关 kthread 上次运行的时间以及应该多久运行一次的信息。
+
+o	A CPU-bound real-time task in a CONFIG_PREEMPT kernel, which might 
+	happen to preempt a low-priority task in the middle of an RCU
+	read-side critical section.   This is especially damaging if
+	that low-priority task is not permitted to run on any other CPU,
+	in which case the next RCU grace period can never complete, which
+	will eventually cause the system to run out of memory and hang.
+	While the system is in the process of running itself out of
+	memory, you might see stall-warning messages.
+
+	CONFIG_PREEMPT 内核中的 CPU 密集型实时任务，它可能会在 RCU 读取端临界区的中间
+	抢占低优先级任务。如果不允许该低优先级任务在任何其他 CPU 上运行，则这尤其具有破坏性，
+	在这种情况下，下一个 RCU 宽限期将永远无法完成，最终将导致系统内存不足并挂起。 
+	当系统正在耗尽内存时，您可能会看到停顿警告消息
+
+o	A CPU-bound real-time task in a CONFIG_PREEMPT_RT kernel that 
+	is running at a higher priority than the RCU softirq threads.
+	This will prevent RCU callbacks from ever being invoked,
+	and in a CONFIG_PREEMPT_RCU kernel will further prevent
+	RCU grace periods from ever completing.  Either way, the
+	system will eventually run out of memory and hang.  In the 
+	CONFIG_PREEMPT_RCU case, you might see stall-warning
+	messages.
+	CONFIG_PREEMPT_RT 内核中的 CPU 密集型实时任务，它以比 RCU 软中断线程更高的优先级运行。
+	这将阻止 RCU 回调被调用，并且在CONFIG_PREEMPT_RCU内核中将进一步阻止 RCU 宽限期完成。 
+	无论哪种方式，系统最终都会耗尽内存并挂起。在 CONFIG_PREEMPT_RCU 情况下，
+	您可能会看到停顿警告消息
+
+o	A hardware or software issue shuts off the scheduler-clock 
+	interrupt on a CPU that is not in dyntick-idle mode.  This
+	problem really has happened, and seems to be most likely to
+	result in RCU CPU stall warnings for CONFIG_NO_HZ_COMMON=n kernels.
+	硬件或软件问题会关闭未处于 dyntick-idle 模式的 CPU 上的调度程序时钟中断。
+	这个问题确实发生了，并且似乎最有可能导致 CONFIG_NO_HZ_COMMON=n 
+	内核的 RCU CPU 停顿警告
+
+o	A bug in the RCU implementation.
+
+o	A hardware failure.  This is quite unlikely, but has occurred 
+	at least once in real life.  A CPU failed in a running system,
+	becoming unresponsive, but not causing an immediate crash.
+	This resulted in a series of RCU CPU stall warnings, eventually
+	leading the realization that the CPU had failed.
+	硬件故障。 这不太可能，但在现实生活中至少发生过一次。 
+	CPU 在运行的系统中出现故障，变得无响应，但不会导致立即崩溃。 
+	这导致了一系列 RCU CPU 停顿警告，最终导致人们意识到 CPU 已发生故障。
+
+RCU bugs can often be debugged with the help of CONFIG_RCU_TRACE and with 
+RCU's event tracing.
+For information on RCU's event tracing, see include/trace/events/rcu.h. 
+---------------------------------------------------------------------------
+为什么RCU打印出来的task并非阻塞的进程，而是idle？
+
+t1 问题现场在这儿！！！
+
+t2
+
+t3
+.
+.
+.
+t23     RCU self-detected stall on CPU0 (t=xxx jiffies),eg: t=2200
+此时按照cpu号0-dump_stack，pid=swappper2/0；这个怎么解释？
+理论上CPU0上调度出现了异常，一直卡在这儿。那当前dump出来的task 应该也是
+异常task啊，为什么是idle呢？
+<1> 内核中的异步操作，那task自然是内核中的某个线程或进程,个人感觉这个概率比较大
+异步操作：硬中断、软中断
+
+
+想法1：
+在switch_to 或process_update中记录task，判断是否一直在同一个task，若是就将其dump出来
+开销：内存操作+if判断和打标记；
+
+硬、软中断问题引起的，此种方法无效；
+---只能通过其他工具抓取硬、软中断进入退出时间是否过长
+
+
+想法2：
+怎么能让RCU warning时打印出异常task呢？
+若是有正常的业务调用系统接口引起的异常，RCU中拿到的task应该就是凶手；
+若是完全由系统底层引起的，非系统调用操作，那RCU中拿到的task是无效的；
+
+《往往RCU self-detected 出现的地方，也会有soft-lockup，这个是什么呢？》
+
+RCU的检测机制怎么触发的？
+
+
+出自kernel/rcu/tree.c文件print_cpu_stall接口
+调用流程：
+rcu_check_callbacks
+--->rcu_pending
+---|--->__rcu_pending
+---|---|--->check_cpu_stall
+---|---|---|--->print_cpu_stall
+
+
+
+
+static void print_cpu_stall(struct rcu_state *rsp)
+{
+	int cpu;
+	unsigned long flags;
+	struct rcu_node *rnp = rcu_get_root(rsp);
+	long totqlen = 0;
+
+	/* Kick and suppress, if so configured. */
+	rcu_stall_kick_kthreads(rsp);
+	if (rcu_cpu_stall_suppress)
+		return;
+
+	/*
+	 * OK, time to rat on ourselves...
+	 * See Documentation/RCU/stallwarn.txt for info on how to debug
+	 * RCU CPU stall warnings.
+	 */
+	pr_err("INFO: %s self-detected stall on CPU", rsp->name);
+	print_cpu_stall_info_begin();
+	print_cpu_stall_info(rsp, smp_processor_id());
+	print_cpu_stall_info_end();
+	for_each_possible_cpu(cpu)
+		totqlen += per_cpu_ptr(rsp->rda, cpu)->qlen;
+	pr_cont(" (t=%lu jiffies g=%ld c=%ld q=%lu)\n",
+		jiffies - rsp->gp_start,
+		(long)rsp->gpnum, (long)rsp->completed, totqlen);
+
+	rcu_check_gp_kthread_starvation(rsp);
+
+	rcu_dump_cpu_stacks(rsp);
+
+	raw_spin_lock_irqsave_rcu_node(rnp, flags);
+	if (ULONG_CMP_GE(jiffies, READ_ONCE(rsp->jiffies_stall)))
+		WRITE_ONCE(rsp->jiffies_stall,
+			   jiffies + 3 * rcu_jiffies_till_stall_check() + 3);
+	raw_spin_unlock_irqrestore_rcu_node(rnp, flags);
+
+	panic_on_rcu_stall();
+
+	/*
+	 * Attempt to revive the RCU machinery by forcing a context switch.
+	 *
+	 * A context switch would normally allow the RCU state machine to make
+	 * progress and it could be we're stuck in kernel space without context
+	 * switches for an entirely unreasonable amount of time.
+	 */
+	resched_cpu(smp_processor_id());
+}
